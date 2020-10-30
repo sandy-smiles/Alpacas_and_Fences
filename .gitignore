@@ -1,0 +1,5 @@
+# Ignore note files
+*_notes.txt
+
+# Ignore python cache files
+__pycache__
