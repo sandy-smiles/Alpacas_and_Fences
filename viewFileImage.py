@@ -4,7 +4,7 @@
 # Authors: 470203101, 470386390, 470345850
 
 # In order to run this file alone:
-# $ python viewFileImage.py
+# $ python viewFileImage.py ./virtualBkgdImgs/IMG20190812150924.jpg
 
 # This script aids in the collection of an image from file.
 
@@ -86,7 +86,7 @@ def main():
     imageFileName = sys.argv[1]
   except:
     print(f"[viewFileImage - ERROR]: You forgot to specify all needed arguments.")
-    print(f"[viewFileImage - ERROR]: Try running:\n\tpython3 viewImage.py ./virtualBkgdImgs/IMG20190812150924.jpg")
+    print(f"[viewFileImage - ERROR]: Try running:\n\tpython3 viewFileImage.py ./virtualBkgdImgs/IMG20190812150924.jpg")
     return
 
   rgb_img = readImage(imageFileName)
