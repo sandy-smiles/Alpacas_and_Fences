@@ -67,9 +67,7 @@ def diffImgs(gray_img, bkgd_gray_img):
   _, thresh = cv2.threshold(diff, 0, 255,
     cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
 
-  diff_img = cv2.bitwise_and(gray_img, gray_img, mask=thresh)
-
-  return diff_img
+  return thresh
 
 ################################################################################
 # Main

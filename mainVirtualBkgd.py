@@ -35,20 +35,57 @@ from imageManipulations import *
 #   - bkgd_img | cv2 image -> image object/data
 # Output:
 #   - N/A
+def diffBkgd2(bgr_img, bkgd_img):
+  # split the image into its separate channels
+  b_img, g_img, r_img = cv2.split(bgr_img)
+  b_bkgd_img, g_bkgd_img, r_bkgd_img = cv2.split(bkgd_img)
+
+  # red channel application
+  r_thresh =  diffImgs(r_img, r_bkgd_img)
+  # green channel application
+  g_thresh =  diffImgs(g_img, g_bkgd_img)
+  # blue channel application
+  b_thresh =  diffImgs(b_img, b_bkgd_img)
+
+  t_thresh = r_thresh & g_thresh & b_thresh
+
+  # red channel application
+  r_diff_img = cv2.bitwise_and(r_img, r_img, mask=t_thresh)
+  # green channel application
+  g_diff_img = cv2.bitwise_and(g_img, g_img, mask=t_thresh)
+  # blue channel application
+  b_diff_img = cv2.bitwise_and(b_img, b_img, mask=t_thresh)
+
+  diff_img = cv2.merge((b_diff_img, g_diff_img, r_diff_img))
+
+  return diff_img
+
+#-------------------------------------------------------------------------------
+# diffBkgd
+# Removes the background of the given rgb_img through diffing the bkgd_img
+# Input:
+#   - bgr_img | cv2 image -> image object/data
+#   - bkgd_img | cv2 image -> image object/data
+# Output:
+#   - N/A
 def diffBkgd(bgr_img, bkgd_img):
   # split the image into its separate channels
   b_img, g_img, r_img = cv2.split(bgr_img)
   b_bkgd_img, g_bkgd_img, r_bkgd_img = cv2.split(bkgd_img)
 
   # red channel application
-  r_diff_img =  diffImgs(r_img, r_bkgd_img)
+  r_thresh =  diffImgs(r_img, r_bkgd_img)
+  r_diff_img = cv2.bitwise_and(r_img, r_img, mask=r_thresh)
   # green channel application
-  g_diff_img =  diffImgs(g_img, g_bkgd_img)
+  g_thresh =  diffImgs(g_img, g_bkgd_img)
+  g_diff_img = cv2.bitwise_and(g_img, g_img, mask=g_thresh)
   # blue channel application
-  b_diff_img =  diffImgs(b_img, b_bkgd_img)
+  b_thresh =  diffImgs(b_img, b_bkgd_img)
+  b_diff_img = cv2.bitwise_and(b_img, b_img, mask=b_thresh)
 
+  diff_img = cv2.merge((b_diff_img, g_diff_img, r_diff_img))
 
-  return cv2.merge((b_diff_img, g_diff_img, r_diff_img))
+  return diff_img
 
 #-------------------------------------------------------------------------------
 # removeBkgd Deprecated
@@ -58,10 +95,6 @@ def diffBkgd(bgr_img, bkgd_img):
 # Output:
 #   - N/A
 def removeBkgdDep(bgr_img):
-  gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
-  ret_gray, thresh_gray = cv2.threshold(gray_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-  print(f"[removeBkgd - INFO]: ret_gray = {ret_gray}")
-
   blue_img, green_img, red_img = cv2.split(bgr_img)
 
   ret_red, thresh_red = cv2.threshold(red_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
@@ -84,6 +117,20 @@ def removeBkgdDep(bgr_img):
   thresh = np.divide(thresh, np.amax(thresh))
 
   return thresh
+
+#-------------------------------------------------------------------------------
+# removeBkgd Deprecated
+# Removes the background of the given rgb_img.
+# Input:
+#   - bgr_img | cv2 image -> image object/data
+# Output:
+#   - N/A
+def removeBkgdDepDep(bgr_img):
+  gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
+  ret_gray, thresh_gray = cv2.threshold(gray_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+  print(f"[removeBkgd - INFO]: ret_gray = {ret_gray}")
+
+  return thresh_gray
 
 #-------------------------------------------------------------------------------
 # removeBkgd
@@ -197,7 +244,7 @@ def mainDep():
 
 
 #-------------------------------------------------------------------------------
-def mainDep2():
+def main2():
   import sys
 
   print("[mainVirtualBkgd - INFO]: Starting mainVirtualBkgd.py")
@@ -212,7 +259,7 @@ def mainDep2():
     bgr_img = captureImg(cap)
 
     # Remove the background
-    bgr_detected_img = removeBkgdDep(bgr_img)
+    bgr_detected_img = removeBkgdDepDep(bgr_img)
 
     # Show images
     frameName = f"Showing webcam"
