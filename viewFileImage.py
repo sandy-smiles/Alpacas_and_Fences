@@ -34,6 +34,34 @@ def readImage(imageFileName):
 # viewImagePersistant
 # Show the given image in a frame with specified name.
 # Input:
+#   - image | cv2 image -> image object/data
+# Output:
+#   - image | cv2 image -> image object/data
+# Note:
+#   - Image will fit screen.
+def resizeImage(image):
+  # Resize the image
+  screen_w = 800;
+  screen_h = 600;
+  img_h = len(image[0])
+  img_w = len(image)
+  scale_const = 0.9
+  #scale_val = scale_const
+  scale_val = {
+    True: screen_w/img_w*scale_const, 
+    False: screen_h/img_h*scale_const,
+  }[img_w > img_h] # percent of original size
+  width = int(img_h * scale_val)
+  height = int(img_w * scale_val)
+  dim = (width, height)
+
+  # resize image
+  return cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+
+#-------------------------------------------------------------------------------
+# viewImagePersistant
+# Show the given image in a frame with specified name.
+# Input:
 #   - frameName | str -> frame name
 #   - image | cv2 image -> image object/data
 # Output:
