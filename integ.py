@@ -2,26 +2,24 @@
 import cv2
 import numpy as np
 
-kernel = 15
-minA = 0.02
-maxA = 0.9
+# kernel = 15
+# minA = 0.02
+# maxA = 0.9
 radius = 8
-sample_in = 0.02	# 2% inward from contour left and right edges
-border_size = 10
-
-error_thresh = 10
-error_count = 0
-prev_point = (-1,-1)
-# curr_point = (-1,-1)
-point_thresh = 20
-
-def removeListValues(givenList, val):
-   return [value for value in givenList if value != val]
+# sample_in = 0.02	# 2% inward from contour left and right edges
+# border_size = 10
+# prev_point = (-1,-1)
 
 # Wear black glove!
 
+def removeListValues(givenList, val):
+   return [value for value in givenList if value != val]
+"""
 def verifyPoint(curr_point):
-
+	error_thresh = 10
+	point_thresh = 20
+	error_count = 0
+	
 	if prev_point == (-1,-1):
 		return curr_point
 
@@ -35,7 +33,7 @@ def verifyPoint(curr_point):
 	else:
 		error_count = 0
 		return curr_point
-
+"""
 
 def checkBlank(im):
 
@@ -62,6 +60,8 @@ def checkBlank(im):
 		return 1
 
 def detectFinger(im):
+	border_size = 10
+	kernel = 15
 
 	if checkBlank(im) == 1:
 		return (-1,-1)
@@ -88,7 +88,6 @@ def detectFinger(im):
 			return finger_loc
 
 	return (-1,-1)
-
 
 def checkDrawChar(im):
 	hsv_im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
@@ -150,7 +149,7 @@ def getNumPlayers(vc,text_display):
 		# DRAWING FINGER POINT
 		if rel_finger_loc != (-1,-1):
 			finger_loc = (rel_finger_loc[0]+draw_box_x1,rel_finger_loc[1])
-			finger_loc = verifyPoint(finger_loc)
+			# finger_loc = verifyPoint(finger_loc)
 			flip_horiz = cv2.circle(flip_horiz,finger_loc,radius,(255,0,0),-1)
 		
 		cv2.rectangle(flip_horiz,(draw_box_x1,draw_box_y1),(draw_box_x2,draw_box_y2),color=(0,0,0,0))
@@ -220,7 +219,7 @@ def getCharacter(vc,text_display):
 		# DRAWING FINGER POINT
 		if rel_finger_loc != (-1,-1):
 			finger_loc = (rel_finger_loc[0]+draw_box_x1,rel_finger_loc[1])
-			finger_loc = verifyPoint(finger_loc)
+			# finger_loc = verifyPoint(finger_loc)
 			flip_horiz = cv2.circle(flip_horiz,finger_loc,radius,(255,0,0),-1)
 
 		# DETECTING FLAG (RED PAPER). Display message to show character is being read.
@@ -298,7 +297,7 @@ def getConfirmation(vc,text_display):
 		# DRAWING FINGER POINT
 		if rel_finger_loc != (-1,-1):
 			finger_loc = (rel_finger_loc[0]+draw_box_x1,rel_finger_loc[1])
-			finger_loc = verifyPoint(finger_loc)
+			# finger_loc = verifyPoint(finger_loc)
 			flip_horiz = cv2.circle(flip_horiz,finger_loc,radius,(255,0,0),-1)
 		
 		cv2.rectangle(flip_horiz,(draw_box_x1,draw_box_y1),(draw_box_x2,draw_box_y2),color=(0,0,0,0))
@@ -343,7 +342,6 @@ def getConfirmation(vc,text_display):
 		if key == 27:
 			break
 
-
 cv2.namedWindow("preview")
 vc = cv2.VideoCapture(0)
 
@@ -353,6 +351,8 @@ if vc.isOpened(): # try to get the first frame
     width = frame.shape[1]
 else:
     rval = False
+
+radius = 8
 
 draw_box_x1 = width-height*3//5
 draw_box_x2 = width
@@ -366,19 +366,6 @@ flag_box_y2 = height//5
 
 num_players = getNumPlayers(vc,'Select number of players')
 char_dict = getCharacter(vc,'Input colour. Awaiting Signal.')
-print(num_players)
-
-# result = getConfirmation(vc,'Confirm?')
-# print(char_dict)
-# def drawGrid(frame, dotsRows, dotsCols):
-
-#     for a in range(dotsRows):
-#       for b in range(dotsCols):
-#         #image = cv2.circle(image, center_coordinates, radius, color, thickness)
-#         frame = cv2.circle(frame, (100+b*100, 100+a*100), 20, (0, 0, 0), 5)
-
 
 vc.release()
 cv2.destroyWindow("preview") 
-
-# print(char_dict)
