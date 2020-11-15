@@ -42,6 +42,13 @@ global colourLabel
 global playerScore
 
 COLOR_MAX = 255
+GRAY_COLOR = 120
+
+
+KERNEL = 'ellipse' # or 'box'
+IMG_SCALE = 0.05 # Scaling to resize img when grouping colours together.
+C_THRESH = 40 # Threshold where colour matching diff below are taken
+G_THRESH = 35 # Threshold where groups above are taken
 
 # kernel = 15
 # minA = 0.02
@@ -88,7 +95,7 @@ def captureImg(cap, show_img=0):
 
   ret, frame = cap.read()
   frameResized = cv2.resize(frame, None, fx=2, fy=2, interpolation=cv2.INTER_AREA)
-  newFrame = removeBkgd(frame)
+  newFrame = replaceBkgd(frame)
   newFrame = cv2.resize(newFrame, None, fx=2, fy=2, interpolation=cv2.INTER_AREA)
 
   newFrame[draw_box_y1:draw_box_y2,draw_box_x1:draw_box_x2,:] = frameResized[draw_box_y1:draw_box_y2,draw_box_x1:draw_box_x2,:]
@@ -96,43 +103,70 @@ def captureImg(cap, show_img=0):
 
   return ret, newFrame
 
-def removeBkgd(bgr_img):
+def replaceBkgd(bgr_img, show_img=0):
+  gray_bkgd = np.ones(bgr_img.shape, np.uint8)*GRAY_COLOR # kernel size
   gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
 
-  frameName = 'removeBkgd'
+  frameName = 'replaceBkgd'
   otsu_img = diffBkgdOtsuGray(bgr_img)
-  otsu_img_resized = resize2ScreenImage(otsu_img)
+  if show_img:
+    otsu_img_resized = resize2ScreenImage(otsu_img)
+    viewImage(frameName+' | otsu_img', otsu_img_resized)
 
   # close the thresh img
-  #k = np.ones((50,50), np.uint8) # kernel size
-  k_size = 55 # kernel size
-  k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
+  k = np.ones((50,50), np.uint8) # kernel size
+  if KERNEL == 'ellipse':
+    k_size = 55 # kernel size
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
   closed_otsu_img = cv2.morphologyEx(otsu_img, cv2.MORPH_CLOSE, k)
-  closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
+  if show_img:
+    closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
+    viewImage(frameName+' | closed_otsu_img', closed_otsu_img_resized)
 
-  scale = 0.05
-  c_thresh = 40
+  scale = IMG_SCALE
+  c_thresh = C_THRESH
   groups_img = createGroupsGray(resizeImage(closed_otsu_img, scale), c_thresh)
   h, w = closed_otsu_img.shape
   groups_img = cv2.resize(groups_img, (w, h), interpolation = cv2.INTER_AREA)
   groups_img = normImg(groups_img)*255
   groups_img = groups_img.astype(np.uint8)
-  groups_img_resized = resize2ScreenImage(groups_img)
+  if show_img:
+    groups_img_resized = resize2ScreenImage(groups_img)
+    viewImage(frameName+' | groups_img', groups_img_resized)
 
   # bin-threshold
-  g_thresh = 80
+  g_thresh = G_THRESH
   _, bin_groups_img = cv2.threshold(groups_img, g_thresh, COLOR_MAX, cv2.THRESH_BINARY)
-  bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
+  if show_img:
+    bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
+    viewImage(frameName+' | bin_groups_img', bin_groups_img_resized)
 
   # Change so that we only look at top numbered groupings
   new_mask_img = cv2.bitwise_and(bin_groups_img, bin_groups_img, mask=closed_otsu_img)
-  new_mask_img_resized = resize2ScreenImage(new_mask_img)
+  if show_img:
+    new_mask_img_resized = resize2ScreenImage(new_mask_img)
+    viewImage(frameName+' | new_mask_img', new_mask_img_resized)
 
 
   # multiply with original so that we can re-otsu
   new_bgr_img = cv2.bitwise_and(bgr_img, bgr_img, mask=new_mask_img)
-  new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
-  return new_bgr_img  
+  if show_img:
+    new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
+    viewImage(frameName+' | new_bgr_img', new_bgr_img_resized)
+
+  # inverse mask to create background
+  new_bkgd_img = cv2.bitwise_and(gray_bkgd, gray_bkgd, mask=~new_mask_img)
+  if show_img:
+    new_bkgd_img_resized = resize2ScreenImage(new_bkgd_img)
+    viewImage(frameName+' | new_bkgd_img', new_bkgd_img_resized)
+
+  # add background to masked foreground
+  new_img = new_bgr_img+new_bkgd_img
+  if show_img:
+    new_img_resized = resize2ScreenImage(new_img)
+    viewImage(frameName+' | new_img', new_img_resized)
+
+  return new_img 
 
 def checkBlank(im):
 
@@ -219,7 +253,7 @@ def checkIfInBound(pt,bound):
 
 # Offer options 1-4.
 def getNumPlayers(vc,text_display):
-  region_thresh = 20
+  region_thresh = 15
   prev_region = -1
   curr_region = -1
   region_count = 0
@@ -364,7 +398,7 @@ def getCharacter(vc,text_display):
       break
 
 def getConfirmation(vc,text_display, letterIndex):
-  region_thresh = 20
+  region_thresh = 15
   prev_region = -1
   curr_region = -1
   region_count = 0
@@ -600,7 +634,7 @@ def convertDot2Coord(dot):
     return coord
 
 def get1Point(vc,text_display,point1=None):
-    region_thresh = 20
+    region_thresh = 15
     prev_region = -1
     curr_region = -1
     region_count = 0
