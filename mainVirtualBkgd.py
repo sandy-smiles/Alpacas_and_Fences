@@ -79,7 +79,7 @@ def removeBkgd(bgr_img):
   new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
   viewImage(frameName+' | new_bgr_img', new_bgr_img_resized)
 
-  return groups_img
+  return new_bgr_img
 
 #-------------------------------------------------------------------------------
 # replaceBkgd
