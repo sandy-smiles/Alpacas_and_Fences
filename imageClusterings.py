@@ -127,7 +127,7 @@ def createGroupsBGR(bgr_img, c_thresh=C_THRESH, d_tile=D_TILE):
     col_range = range(col)
     if r%2 != 0:
       col_range = reversed(col_range)
-    print(f"[createGroups - DATA]: r = {r}, gp_n = {gp_n}")
+    #print(f"[createGroups - DATA]: r = {r}, gp_n = {gp_n}")
     for c in col_range:
       gps = peekSurround(r, c, tiles)
       if len(gps.keys()) == 0:
@@ -203,7 +203,7 @@ def createGroupsGray(gray_img, c_thresh=C_THRESH, d_tile=D_TILE):
     col_range = range(col)
     if r%2 != 0:
       col_range = reversed(col_range)
-    print(f"[createGroups - DATA]: r = {r}, gp_n = {gp_n}")
+    #print(f"[createGroups - DATA]: r = {r}, gp_n = {gp_n}")
     for c in col_range:
       gps = peekSurround(r, c, tiles)
       if len(gps.keys()) == 0:
