@@ -120,7 +120,7 @@ def checkIfInBound(pt,bound):
 		return False
 
 # Offer options 1-4.
-def getNumPlayers(cv,text_display):
+def getNumPlayers(vc,text_display):
 	region_thresh = 40
 	prev_region = -1
 	curr_region = -1
@@ -179,7 +179,18 @@ def getNumPlayers(cv,text_display):
 		if curr_region == prev_region and curr_region != -1:
 			region_count += 1
 			if region_count > region_thresh:
-				return curr_region
+				if getConfirmation(vc,'Lock in number of players: '+str(curr_region)) == True:
+					return curr_region
+				else:
+					# Reset values and restart
+					region_count = 0
+					prev_region = -1
+					curr_region = -1
+					finger_loc = (-1,-1)
+
+					# Load most updated image and then output.
+					rval, frame = vc.read()
+					flip_horiz = cv2.flip(frame, 1)
 		else:
 			region_count = 0
 
@@ -212,9 +223,13 @@ def getCharacter(vc,text_display):
 			finger_loc = verifyPoint(finger_loc)
 			flip_horiz = cv2.circle(flip_horiz,finger_loc,radius,(255,0,0),-1)
 
-		# DETECTING FLAG (RED PAPER)
+		# DETECTING FLAG (RED PAPER). Display message to show character is being read.
 		flag_sub_im = flip_horiz[flag_box_y1:flag_box_y2,flag_box_x1:flag_box_x2]
 		draw_char_status = checkDrawChar(flag_sub_im)
+		if draw_char_status: string_display = 'Reading drawn character...'
+		else: string_display = text_display
+
+
 		print(draw_char_status)
 
 
@@ -225,19 +240,109 @@ def getCharacter(vc,text_display):
 		elif prev_status == True and draw_char_status == False:
 			drawn_char = removeListValues(drawn_char,(-1,-1))
 			char_dict[num_chars] = drawn_char
-			return char_dict
-		
+
+			if getConfirmation(vc,'Lock in the drawn character?') == True:
+				return char_dict
+			else:
+				# Reset values and restart
+				# draw_char_status = False
+				prev_status = False
+				drawn_char = []
+				char_dict = dict()
+
+				# Load most updated image and then output.
+				rval, frame = vc.read()
+				flip_horiz = cv2.flip(frame, 1)
+
 		prev_status = draw_char_status
 
 		cv2.rectangle(flip_horiz,(draw_box_x1,draw_box_y1),(draw_box_x2,draw_box_y2),color=(0,0,0,0))
 		cv2.rectangle(flip_horiz,(flag_box_x1,flag_box_y1),(flag_box_x2,flag_box_y2),color=(0,0,0,0))
 
-		cv2.putText(flip_horiz,text_display,(width//5,height*4//5), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),3,cv2.LINE_AA)
+		cv2.putText(flip_horiz,string_display,(width//5,height*4//5), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),3,cv2.LINE_AA)
 
 		cv2.imshow("preview", flip_horiz)
 		key = cv2.waitKey(20)
 		if key == 27: # exit on ESC
 			break
+
+def getConfirmation(vc,text_display):
+	region_thresh = 40
+	prev_region = -1
+	curr_region = -1
+	region_count = 0
+	finger_loc = (-1,-1)
+
+	margin = 75
+	text_margin = 25
+	option_box_h = 100
+	option_box_w = abs(draw_box_x1-draw_box_x2)-2*margin
+
+	region_bounds = {1:[(draw_box_x1+margin,draw_box_y1+margin),option_box_w,option_box_h],0:[(draw_box_x1+margin,draw_box_y2-margin-option_box_h),option_box_w,option_box_h]}
+	region_label = {1:'Confirm',0:'Cancel'}
+
+	# Draw options in box
+	COORD = 0
+	WIDTH = 1
+	HEIGHT = 2
+
+	rval, frame = vc.read()
+	while rval:
+		rval, frame = vc.read()
+		flip_horiz = cv2.flip(frame, 1)
+
+		# DETECTING FINGER
+		draw_sub_im = flip_horiz[draw_box_y1:draw_box_y2,draw_box_x1:draw_box_x2]
+		rel_finger_loc = detectFinger(draw_sub_im)	# Relative finger point
+
+		# DRAWING FINGER POINT
+		if rel_finger_loc != (-1,-1):
+			finger_loc = (rel_finger_loc[0]+draw_box_x1,rel_finger_loc[1])
+			finger_loc = verifyPoint(finger_loc)
+			flip_horiz = cv2.circle(flip_horiz,finger_loc,radius,(255,0,0),-1)
+		
+		cv2.rectangle(flip_horiz,(draw_box_x1,draw_box_y1),(draw_box_x2,draw_box_y2),color=(0,0,0,0))
+		cv2.rectangle(flip_horiz,(flag_box_x1,flag_box_y1),(flag_box_x2,flag_box_y2),color=(0,0,0,0))
+
+		# Intructions for user
+		cv2.putText(flip_horiz,text_display,(width//5,height*4//5), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),3,cv2.LINE_AA)
+
+		# Draw options in box
+		for r in [1,0]:
+			coord1 = region_bounds[r][COORD]
+			coord2 = (region_bounds[r][COORD][0] + region_bounds[r][WIDTH], region_bounds[r][COORD][1] + region_bounds[r][HEIGHT])
+			text_coord = (coord1[0] + 25,coord1[1] + 75)
+			cv2.rectangle(flip_horiz,coord1,coord2,color=(0,0,0,0))
+			cv2.putText(flip_horiz,region_label[r],text_coord, cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),3,cv2.LINE_AA)
+
+		# Identify the region the finger is in
+		for r in [1,0]:
+			if checkIfInBound(finger_loc,region_bounds[r]) == True:
+				curr_region = r
+				break
+			else:
+				curr_region = -1
+
+		# Track finger position over time
+		if curr_region == prev_region and curr_region != -1:
+			region_count += 1
+			if region_count > region_thresh:
+				if curr_region == 1:
+					return True
+				else:
+					return False
+				# return curr_region
+		else:
+			region_count = 0
+
+		prev_region = curr_region
+		print(region_count)
+
+		cv2.imshow("preview", flip_horiz)
+		key = cv2.waitKey(20)
+		if key == 27:
+			break
+
 
 cv2.namedWindow("preview")
 vc = cv2.VideoCapture(0)
@@ -259,10 +364,12 @@ flag_box_x2 = height//5
 flag_box_y1 = 0
 flag_box_y2 = height//5
 
-# char_dict = getCharacter(vc,'Draw colour character')
 num_players = getNumPlayers(vc,'Select number of players')
+char_dict = getCharacter(vc,'Input colour. Awaiting Signal.')
 print(num_players)
 
+# result = getConfirmation(vc,'Confirm?')
+# print(char_dict)
 # def drawGrid(frame, dotsRows, dotsCols):
 
 #     for a in range(dotsRows):
