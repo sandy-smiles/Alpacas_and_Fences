@@ -36,21 +36,23 @@ COLOR_MAX = 255
 #   - bgr_img | cv2 image -> image object/data
 # Output:
 #   - N/A
-def removeBkgd(bgr_img):
+def removeBkgd(bgr_img, show_img=0):
   gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
 
   frameName = 'removeBkgd'
   otsu_img = diffBkgdOtsuGray(bgr_img)
-  otsu_img_resized = resize2ScreenImage(otsu_img)
-  viewImage(frameName+' | otsu_img', otsu_img_resized)
+  if show_img:
+    otsu_img_resized = resize2ScreenImage(otsu_img)
+    viewImage(frameName+' | otsu_img', otsu_img_resized)
 
   # close the thresh img
-  #k = np.ones((50,50), np.uint8) # kernel size
-  k_size = 55 # kernel size
-  k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
+  k = np.ones((50,50), np.uint8) # kernel size
+  #k_size = 55 # kernel size
+  #k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
   closed_otsu_img = cv2.morphologyEx(otsu_img, cv2.MORPH_CLOSE, k)
-  closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
-  viewImage(frameName+' | closed_otsu_img', closed_otsu_img_resized)
+  if show_img:
+    closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
+    viewImage(frameName+' | closed_otsu_img', closed_otsu_img_resized)
 
   scale = 0.05
   c_thresh = 40
@@ -59,25 +61,29 @@ def removeBkgd(bgr_img):
   groups_img = cv2.resize(groups_img, (w, h), interpolation = cv2.INTER_AREA)
   groups_img = normImg(groups_img)*255
   groups_img = groups_img.astype(np.uint8)
-  groups_img_resized = resize2ScreenImage(groups_img)
-  viewImage(frameName+' | groups_img', groups_img_resized)
+  if show_img:
+    groups_img_resized = resize2ScreenImage(groups_img)
+    viewImage(frameName+' | groups_img', groups_img_resized)
 
   # bin-threshold
-  g_thresh = 80
+  g_thresh = 50
   _, bin_groups_img = cv2.threshold(groups_img, g_thresh, COLOR_MAX, cv2.THRESH_BINARY)
-  bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
-  viewImage(frameName+' | bin_groups_img', bin_groups_img_resized)
+  if show_img:
+    bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
+    viewImage(frameName+' | bin_groups_img', bin_groups_img_resized)
 
   # Change so that we only look at top numbered groupings
   new_mask_img = cv2.bitwise_and(bin_groups_img, bin_groups_img, mask=closed_otsu_img)
-  new_mask_img_resized = resize2ScreenImage(new_mask_img)
-  viewImage(frameName+' | new_mask_img', new_mask_img_resized)
+  if show_img:
+    new_mask_img_resized = resize2ScreenImage(new_mask_img)
+    viewImage(frameName+' | new_mask_img', new_mask_img_resized)
 
 
   # multiply with original so that we can re-otsu
   new_bgr_img = cv2.bitwise_and(bgr_img, bgr_img, mask=new_mask_img)
-  new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
-  viewImage(frameName+' | new_bgr_img', new_bgr_img_resized)
+  if show_img:
+    new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
+    viewImage(frameName+' | new_bgr_img', new_bgr_img_resized)
 
   return new_bgr_img
 
