@@ -31,21 +31,21 @@ def readImage(imageFileName):
   return  cv2.imread(imageFileName)
 
 #-------------------------------------------------------------------------------
-# viewImagePersistant
-# Show the given image in a frame with specified name.
+# resize2ScreenImage
+# Resize the image to better fit on the screen.
 # Input:
 #   - image | cv2 image -> image object/data
 # Output:
 #   - image | cv2 image -> image object/data
 # Note:
 #   - Image will fit screen.
-def resizeImage(image):
+def resize2ScreenImage(image):
   # Resize the image
   screen_w = 800;
   screen_h = 600;
   img_h = len(image[0])
   img_w = len(image)
-  scale_const = 0.9
+  scale_const = 0.75
   #scale_val = scale_const
   scale_val = {
     True: screen_w/img_w*scale_const, 
