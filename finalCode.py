@@ -19,6 +19,14 @@ from sklearn.model_selection import train_test_split
 from skimage.feature import hog
 import pickle
 
+from PIL import Image
+
+from viewCamera import *
+from viewFileImage import *
+from imageManipulations import *
+from imageClusterings import *
+from imageBkgds import *
+
 ################################################################################
 # Globals
 ################################################################################
@@ -33,6 +41,7 @@ global playerColour
 global colourLabel 
 global playerScore
 
+COLOR_MAX = 255
 
 # kernel = 15
 # minA = 0.02
@@ -78,9 +87,52 @@ def captureImg(cap, show_img=0):
     raise IOError("Cannot open webcam")
 
   ret, frame = cap.read()
-  frame = cv2.resize(frame, None, fx=2, fy=2, interpolation=cv2.INTER_AREA)
+  frameResized = cv2.resize(frame, None, fx=2, fy=2, interpolation=cv2.INTER_AREA)
+  newFrame = removeBkgd(frame)
+  newFrame = cv2.resize(newFrame, None, fx=2, fy=2, interpolation=cv2.INTER_AREA)
 
-  return rval, frame
+  newFrame[draw_box_y1:draw_box_y2,draw_box_x1:draw_box_x2,:] = frameResized[draw_box_y1:draw_box_y2,draw_box_x1:draw_box_x2,:]
+  newFrame[flag_box_y1:flag_box_y2,flag_box_x1:flag_box_x2,:] = frameResized[flag_box_y1:flag_box_y2,flag_box_x1:flag_box_x2,:]
+
+  return ret, newFrame
+
+def removeBkgd(bgr_img):
+  gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
+
+  frameName = 'removeBkgd'
+  otsu_img = diffBkgdOtsuGray(bgr_img)
+  otsu_img_resized = resize2ScreenImage(otsu_img)
+
+  # close the thresh img
+  #k = np.ones((50,50), np.uint8) # kernel size
+  k_size = 55 # kernel size
+  k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
+  closed_otsu_img = cv2.morphologyEx(otsu_img, cv2.MORPH_CLOSE, k)
+  closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
+
+  scale = 0.05
+  c_thresh = 40
+  groups_img = createGroupsGray(resizeImage(closed_otsu_img, scale), c_thresh)
+  h, w = closed_otsu_img.shape
+  groups_img = cv2.resize(groups_img, (w, h), interpolation = cv2.INTER_AREA)
+  groups_img = normImg(groups_img)*255
+  groups_img = groups_img.astype(np.uint8)
+  groups_img_resized = resize2ScreenImage(groups_img)
+
+  # bin-threshold
+  g_thresh = 80
+  _, bin_groups_img = cv2.threshold(groups_img, g_thresh, COLOR_MAX, cv2.THRESH_BINARY)
+  bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
+
+  # Change so that we only look at top numbered groupings
+  new_mask_img = cv2.bitwise_and(bin_groups_img, bin_groups_img, mask=closed_otsu_img)
+  new_mask_img_resized = resize2ScreenImage(new_mask_img)
+
+
+  # multiply with original so that we can re-otsu
+  new_bgr_img = cv2.bitwise_and(bgr_img, bgr_img, mask=new_mask_img)
+  new_bgr_img_resized = resize2ScreenImage(new_bgr_img)
+  return new_bgr_img  
 
 def checkBlank(im):
 
@@ -167,7 +219,7 @@ def checkIfInBound(pt,bound):
 
 # Offer options 1-4.
 def getNumPlayers(vc,text_display):
-  region_thresh = 40
+  region_thresh = 20
   prev_region = -1
   curr_region = -1
   region_count = 0
@@ -312,7 +364,7 @@ def getCharacter(vc,text_display):
       break
 
 def getConfirmation(vc,text_display, letterIndex):
-  region_thresh = 40
+  region_thresh = 20
   prev_region = -1
   curr_region = -1
   region_count = 0
@@ -548,7 +600,7 @@ def convertDot2Coord(dot):
     return coord
 
 def get1Point(vc,text_display,point1=None):
-    region_thresh = 40
+    region_thresh = 20
     prev_region = -1
     curr_region = -1
     region_count = 0
