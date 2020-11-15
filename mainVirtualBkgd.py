@@ -25,7 +25,7 @@ from imageBkgds import *
 ################################################################################
 # Constants
 ################################################################################
-
+COLOR_MAX = 255
 
 ################################################################################
 # Functions
@@ -45,27 +45,31 @@ def removeBkgd(bgr_img):
   viewImage(frameName+' | otsu_img', otsu_img_resized)
 
   # close the thresh img
-  k = np.ones((50,50), np.uint8) # kernel size
+  #k = np.ones((50,50), np.uint8) # kernel size
+  k_size = 55 # kernel size
+  k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size)) 
   closed_otsu_img = cv2.morphologyEx(otsu_img, cv2.MORPH_CLOSE, k)
   closed_otsu_img_resized = resize2ScreenImage(closed_otsu_img)
   viewImage(frameName+' | closed_otsu_img', closed_otsu_img_resized)
 
   scale = 0.05
-  c_thresh = 50
+  c_thresh = 40
   groups_img = createGroupsGray(resizeImage(closed_otsu_img, scale), c_thresh)
   h, w = closed_otsu_img.shape
   groups_img = cv2.resize(groups_img, (w, h), interpolation = cv2.INTER_AREA)
   groups_img = normImg(groups_img)*255
   groups_img = groups_img.astype(np.uint8)
-  print(f"groups_img.dtype = {groups_img.dtype}")
-  print(f"groups_img.shape = {groups_img.shape}")
-  print(f"closed_otsu_img.shape = {closed_otsu_img.shape}")
-  print(f"bgr_img.dtype = {bgr_img.dtype}")
   groups_img_resized = resize2ScreenImage(groups_img)
   viewImage(frameName+' | groups_img', groups_img_resized)
 
+  # bin-threshold
+  g_thresh = 80
+  _, bin_groups_img = cv2.threshold(groups_img, g_thresh, COLOR_MAX, cv2.THRESH_BINARY)
+  bin_groups_img_resized = resize2ScreenImage(bin_groups_img)
+  viewImage(frameName+' | bin_groups_img', bin_groups_img_resized)
+
   # Change so that we only look at top numbered groupings
-  new_mask_img = cv2.bitwise_and(groups_img, groups_img, mask=closed_otsu_img)
+  new_mask_img = cv2.bitwise_and(bin_groups_img, bin_groups_img, mask=closed_otsu_img)
   new_mask_img_resized = resize2ScreenImage(new_mask_img)
   viewImage(frameName+' | new_mask_img', new_mask_img_resized)
 
