@@ -34,7 +34,7 @@ from imageManipulations import *
 #   - bgr_img | cv2 image -> image object/data
 #   - bkgd_img | cv2 image -> image object/data
 # Output:
-#   - N/A
+#   - gray_img | cv2 image -> image object/data
 def diffBkgdThreshBGR(bgr_img, bkgd_img):
   # split the image into its separate channels
   b_img, g_img, r_img = cv2.split(bgr_img)
@@ -67,7 +67,7 @@ def diffBkgdThreshBGR(bgr_img, bkgd_img):
 #   - bgr_img | cv2 image -> image object/data
 #   - bkgd_img | cv2 image -> image object/data
 # Output:
-#   - N/A
+#   - gray_img | cv2 image -> image object/data
 def diffBkgdBGRThresh(bgr_img, bkgd_img):
   # split the image into its separate channels
   b_img, g_img, r_img = cv2.split(bgr_img)
@@ -93,30 +93,42 @@ def diffBkgdBGRThresh(bgr_img, bkgd_img):
 # Input:
 #   - bgr_img | cv2 image -> image object/data
 # Output:
-#   - N/A
+#   - gray_img | cv2 image -> image object/data
 def diffBkgdOtsuBGR(bgr_img):
-  blue_img, green_img, red_img = cv2.split(bgr_img)
+  c_imgs = cv2.split(bgr_img)
+  max_px_val = 255
+  block_size = 11
+  mean_const = 2
 
-  ret_red, thresh_red = cv2.threshold(red_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-  print(f"[removeBkgd - INFO]: size(thresh_red) = {thresh_red.shape}")
-  print(f"[removeBkgd - INFO]: ret_red = {ret_red}")
+  thresh = np.zeros(bgr_img.shape[0:2])
+  for c_img in c_imgs:
+    _, thresh_img = cv2.threshold(c_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    thresh += thresh_img
 
-
-  ret_green, thresh_green = cv2.threshold(green_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-  print(f"[removeBkgd - INFO]: size(thresh_green) = {thresh_green.shape}")
-  print(f"[removeBkgd - INFO]: ret_green = {ret_green}")
-
-
-  ret_blue, thresh_blue = cv2.threshold(blue_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-  print(f"[removeBkgd - INFO]: size(thresh_blue) = {thresh_blue.shape}")
-  print(f"[removeBkgd - INFO]: ret_blue = {ret_blue}")
-
-  ret = int(ret_red+ret_green+ret_blue)/3
-  thresh = (thresh_red+thresh_green+thresh_blue)
+  thresh = np.divide(thresh, len(c_imgs))
   thresh = np.subtract(thresh, np.amin(thresh))
   thresh = np.divide(thresh, np.amax(thresh))
-
   return thresh
+
+  """
+  c_imgs = cv2.split(bgr_img)
+  max_px_val = 255
+  block_size = 11
+  mean_const = 2
+
+  thresh = np.zeros(bgr_img.shape[0:2])
+  for i, c_img in enumerate(c_imgs):
+    _, thresh_img = cv2.threshold(c_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    if i == 0:
+      thresh = thresh_img
+    else:
+      thresh = thresh & thresh_img
+
+  thresh = np.divide(thresh, len(c_imgs))
+  thresh = np.subtract(thresh, np.amin(thresh))
+  thresh = np.divide(thresh, np.amax(thresh))
+  return thresh
+  """
 
 #-------------------------------------------------------------------------------
 # diffBkgdOtsuGray
@@ -124,7 +136,7 @@ def diffBkgdOtsuBGR(bgr_img):
 # Input:
 #   - bgr_img | cv2 image -> image object/data
 # Output:
-#   - N/A
+#   - gray_img | cv2 image -> image object/data
 def diffBkgdOtsuGray(bgr_img):
   gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
   ret_gray, thresh_gray = cv2.threshold(gray_img, 0,255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
@@ -138,7 +150,7 @@ def diffBkgdOtsuGray(bgr_img):
 # Input:
 #   - bgr_img | cv2 image -> image object/data
 # Output:
-#   - N/A
+#   - bgr_img | cv2 image -> image object/data
 def diffBkgdModels(bgr_img, model='fcn'):
   if model == 'fcn':
     model = models.segmentation.fcn_resnet101(pretrained=True).eval()

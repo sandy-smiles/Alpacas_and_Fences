@@ -69,6 +69,39 @@ def diffImgs(gray_img, bkgd_gray_img):
 
   return thresh
 
+#-------------------------------------------------------------------------------
+# normImg
+# Normalise image
+# Input:
+#   - img | cv2 image -> image object/data
+# Output:
+#   - img | cv2 image -> image object/data with values between 0.0 and 1.0
+def normImg(img):
+  img = np.subtract(img, np.amin(img))
+  img = np.divide(img, np.amax(img))
+  return img
+
+#-------------------------------------------------------------------------------
+# resizeImage
+# Resize the image.
+# Input:
+#   - image | cv2 image -> image object/data
+#   - scale | 0.0 -> 1.0 | float -> scale
+# Output:
+#   - image | cv2 image -> image object/data
+# Note:
+#   - Image will fit screen.
+def resizeImage(image, scale=0.5):
+  # Resize the image
+  img_h, img_w = image.shape[0:2]
+  new_w = int(img_w * scale)
+  new_h = int(img_h * scale)
+  # dim = (width, height)
+  dim = (new_w, new_h)
+
+  # resize image
+  return cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+
 ################################################################################
 # Main
 ################################################################################
