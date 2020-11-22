@@ -1,10 +1,12 @@
 ################################################################################
 
 # Alpacas & Fences - imageClusterings.py
-# Authors: 470203101, 470386390, 470345850
+# Authors: 470203101, 470386390, 470354850
 
 # In order to run this file alone:
-# $ python imageClusterings.py ./virtualBkgdImgs/IMG20190812150924.jpg
+# $ python imageClusterings.py ./virtualBkgdImgs/imageWithoutLight.PNG
+# OR
+# $ python imageClusterings.py ./virtualBkgdImgs/IMG20190812150923.jpg
 
 ################################################################################
 # Imports

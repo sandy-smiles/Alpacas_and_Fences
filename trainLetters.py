@@ -1,10 +1,10 @@
 ################################################################################
 
-# Alpacas & Fences - viewCamera
-# Authors: 470203101, 470386390, 470354850
+# Alpacas & Fences - trainLetters
+# Authors: 470354850, 470386390, 470203101
 
 # In order to run this file alone:
-# $ python viewCamera.py
+# $ python trainLetters.py
 
 # This script aids in the collection of web camera images.
 
@@ -109,7 +109,5 @@ if __name__ == "__main__":
 
   print("END PROGRAM")
 
-  #while True:
-    
 
 

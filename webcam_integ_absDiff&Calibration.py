@@ -1,7 +1,20 @@
+################################################################################
 
+# Alpacas & Fences - webcam_integ
+# Authors: 470386390, 470354850, 470203101
+
+# In order to run this file alone:
+# $ python webcam_integ.py
+
+################################################################################
+# Imports
+################################################################################
 import cv2
 import numpy as np
 
+################################################################################
+# Constants
+################################################################################
 kernel = 15
 minA = 0.02
 maxA = 0.9
@@ -14,6 +27,9 @@ text = 'Taking calibration in: '
 wait_periods = 5
 wait = calibrate_counts//wait_periods
 
+################################################################################
+# Functions
+################################################################################
 def calibrate(x1,y1,x2,y2):
 
 	for c in range(calibrate_counts):
@@ -29,6 +45,7 @@ def calibrate(x1,y1,x2,y2):
 	ref_im = flipHorizontal[y1:y2,x1:x2]
 	return ref_im
 
+#-------------------------------------------------------------------------------
 def checkBlank(ref_im,im):	# Check if current image equal to reference image!
 
 	# im = cv2.GaussianBlur(im,(kernel,kernel),0)
@@ -40,6 +57,7 @@ def checkBlank(ref_im,im):	# Check if current image equal to reference image!
 	else:
 		return 1
 
+#-------------------------------------------------------------------------------
 def detectFinger(ref_im,im):
 	# if checkBlank == 1:
 
@@ -72,8 +90,9 @@ def detectFinger(ref_im,im):
 
 	return im
 
-
-
+################################################################################
+# Main
+################################################################################
 cv2.namedWindow("preview")
 vc = cv2.VideoCapture(0)
 
@@ -93,10 +112,7 @@ bound2 = (x2,y2)
 
 count = 0
 
-
 ref_im = calibrate(x1,y1,x2,y2)
-
-
 
 while rval:
 	rval, frame = vc.read()

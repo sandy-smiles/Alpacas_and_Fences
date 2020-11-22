@@ -1,7 +1,7 @@
 ################################################################################
 
 # Alpacas & Fences - viewCamera
-# Authors: 470203101, 470386390, 470345850
+# Authors: 470203101, 470386390, 470354850
 
 # In order to run this file alone:
 # $ python viewCamera.py

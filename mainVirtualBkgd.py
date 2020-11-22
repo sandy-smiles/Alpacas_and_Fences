@@ -1,13 +1,14 @@
 ################################################################################
 
 # Alpacas & Fences - mainVirtualBkgd
-# Authors: 470203101, 470386390, 470345850
+# Authors: 470203101, 470386390, 470354850
 
 # In order to run this file alone:
+# $ python mainVirtualBkgd.py ./virtualBkgdImgs/imageWithoutLight.PNG
+# OR
 # $ python mainVirtualBkgd.py ./virtualBkgdImgs/IMG20190812150924.jpg
 
 # This script aids in the removal of the background of a person.
-# Follows the instructions from https://www.learnopencv.com/applications-of-foreground-background-separation-with-semantic-segmentation/
 
 ################################################################################
 # Imports

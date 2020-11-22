@@ -1,6 +1,21 @@
+################################################################################
 
+# Alpacas & Fences - fD
+# Authors: 470386390, 470354850, 470203101
+
+# In order to run this file alone:
+# $ python fD.py
+
+# This script looks into the CV problem of finger detection.
+
+################################################################################
+# Imports
+################################################################################
 import cv2
 
+################################################################################
+# Main
+################################################################################
 # Assuming wearing long sleeve? Black background... or wearing a glove?
 # Maybe have white background, wear a black glove to detect
 

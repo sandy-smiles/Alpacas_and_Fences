@@ -1,9 +1,11 @@
 ################################################################################
 
 # Alpacas & Fences - viewFileImage
-# Authors: 470203101, 470386390, 470345850
+# Authors: 470203101, 470386390, 470354850
 
 # In order to run this file alone:
+# $ python viewFileImage.py ./virtualBkgdImgs/imageWithoutLight.PNG
+# OR
 # $ python viewFileImage.py ./virtualBkgdImgs/IMG20190812150924.jpg
 
 # This script aids in the collection of an image from file.

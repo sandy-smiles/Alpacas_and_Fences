@@ -1,13 +1,27 @@
+################################################################################
+
+# Alpacas & Fences - dotsAndBoxes
+# Authors: 470354850, 470386390, 470203101
+
+# In order to run this file alone:
+# $ python dotsAndBoxes.py
+
+# This script looks into the behind-the-scenes game mechanics for dots and boxes.
+
+################################################################################
+# Imports
+################################################################################
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import idx2numpy
 import math
 
+################################################################################
+# Main
+################################################################################
 # Main Code
 if __name__ == "__main__":
-
-
     numPlayers = int(input('Number of Players? '))
     playerScore = np.zeros(numPlayers)
     nRows = 4
@@ -24,8 +38,7 @@ if __name__ == "__main__":
     
     for i in range(nRows):
         for j in range(nCols):
-            plt.plot(j+1,i+1,'ob', linewidth = 10) 
-            
+            plt.plot(j+1,i+1,'ob', linewidth = 10)
 
     plt.show(block=False) 
 
@@ -79,7 +92,6 @@ if __name__ == "__main__":
         for i in range(nRows-1) : 
             for j in range(nCols-1) :    
                 if lineMatrix[i-1,j-1,0] > 0 and lineMatrix[i-1,j-1,1] > 0  and lineMatrix[i,j-1,0] > 0 and lineMatrix[i-1,j,1] > 0 and scoreMatrix[i-1,j-1] == 0 :
-                   
                     scoreMatrix[i-1,j-1] = playerTurn
                     scoredPreviousTurn = 1 
 
@@ -87,8 +99,4 @@ if __name__ == "__main__":
 
                     playerScore[playerTurn-1] += 1
 
-                    
         plt.show(block=False) 
-
-
-

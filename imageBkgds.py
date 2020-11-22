@@ -1,7 +1,7 @@
 ################################################################################
 
 # Alpacas & Fences - imageBkgds
-# Authors: 470203101, 470386390, 470345850
+# Authors: 470203101, 470386390, 470354850
 
 # In order to run this file alone:
 # $ python imageBkgds.py
@@ -202,7 +202,7 @@ def diffBkgdModels(bgr_img, model='fcn'):
     r[idx] = label_colors[l, 0]
     g[idx] = label_colors[l, 1]
     b[idx] = label_colors[l, 2]
-    
+
   bgr = np.stack([b, g, r], axis=2)
   return bgr
 

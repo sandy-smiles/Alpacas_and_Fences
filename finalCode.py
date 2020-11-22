@@ -1,7 +1,12 @@
 ################################################################################
 
-# Alpacas & Fences 
-# Authors: 470203101, 470386390, 470345850
+# Alpacas & Fences - finalCode
+# Authors: 470354850, 470386390, 470203101
+
+# In order to run this file alone:
+# $ python finalCode.py
+
+# This script is the main and final code submission of Alpacas and Fences demo.
 
 ################################################################################
 # Imports
@@ -30,7 +35,6 @@ from imageBkgds import *
 ################################################################################
 # Globals
 ################################################################################
-
 global lineMatrix
 global scoreMatrix
 global nRows
@@ -61,9 +65,7 @@ radius = 8
 ################################################################################
 # Functions
 ################################################################################
-
 # Wear black glove!
-
 def removeListValues(givenList, val):
    return [value for value in givenList if value != val]
 """
@@ -103,6 +105,7 @@ def captureImg(cap, show_img=0):
 
   return ret, newFrame
 
+#-------------------------------------------------------------------------------
 def replaceBkgd(bgr_img, show_img=0):
   gray_bkgd = np.ones(bgr_img.shape, np.uint8)*GRAY_COLOR # kernel size
   gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
@@ -168,10 +171,9 @@ def replaceBkgd(bgr_img, show_img=0):
 
   return new_img 
 
+#-------------------------------------------------------------------------------
 def checkBlank(im):
-
   threshold = 8
-
   h,w,d = im.shape[0],im.shape[1],im.shape[2]
 
   # Divide into rows. Calculate the mean pixel value. If different, if it's empty.
@@ -192,6 +194,7 @@ def checkBlank(im):
     #print('Blank')
     return 1
 
+#-------------------------------------------------------------------------------
 def detectFinger(im):
   border_size = 10
   kernel = 15
@@ -215,13 +218,13 @@ def detectFinger(im):
     x,y,w,h = cv2.boundingRect(cnt)
 
     if w < im.shape[1]:
-
       finger_loc = tuple(cnt[cnt[:,:,1].argmin()][0])
       finger_loc = (finger_loc[0]-border_size,finger_loc[1]-border_size)  # Relative to main img
       return finger_loc
 
   return (-1,-1)
 
+#-------------------------------------------------------------------------------
 def checkDrawChar(im):
   hsv_im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
   hue = hsv_im[:,:,0]
@@ -237,6 +240,7 @@ def checkDrawChar(im):
   else:
     return 1
 
+#-------------------------------------------------------------------------------
 def checkIfInBound(pt,bound):
   ref_coord_x = bound[0][0]
   ref_coord_y = bound[0][1]
@@ -251,6 +255,7 @@ def checkIfInBound(pt,bound):
   else:
     return False
 
+#-------------------------------------------------------------------------------
 # Offer options 1-4.
 def getNumPlayers(vc,text_display):
   region_thresh = 15
@@ -332,6 +337,7 @@ def getNumPlayers(vc,text_display):
     if key == 27:
       break
 
+#-------------------------------------------------------------------------------
 def getCharacter(vc,text_display):
   char_dict = dict()
   num_chars = 0
@@ -355,8 +361,10 @@ def getCharacter(vc,text_display):
     # DETECTING FLAG (RED PAPER). Display message to show character is being read.
     flag_sub_im = frame[flag_box_y1:flag_box_y2,flag_box_x1:flag_box_x2]
     draw_char_status = checkDrawChar(flag_sub_im)
-    if draw_char_status: string_display = 'Reading drawn character...'
-    else: string_display = text_display
+    if draw_char_status:
+      string_display = 'Reading drawn character...'
+    else:
+      string_display = text_display
 
 
     #print(draw_char_status)
@@ -397,6 +405,7 @@ def getCharacter(vc,text_display):
     if key == 27: # exit on ESC
       break
 
+#-------------------------------------------------------------------------------
 def getConfirmation(vc,text_display, letterIndex):
   region_thresh = 15
   prev_region = -1
@@ -568,6 +577,7 @@ def convertToLetter(char_dict) :
     print(y_pred)
     return y_pred[0]
 
+#-------------------------------------------------------------------------------
 # checkValidInput
 def checkValidInput(x1,y1,x2,y2):
        
@@ -614,12 +624,13 @@ def updateScore():
 
     return playerScored
 
-# -----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 def get2Points(vc):
     dot1 = get1Point(vc,'Select Point 1')
     dot2 = get1Point(vc,'Select Point 2',point1=convertDot2Coord(dot1))
     return [dot1,dot2]
 
+#-------------------------------------------------------------------------------
 def convertDot2Coord(dot):
     offset = 100
     max_w = abs(draw_box_x1-draw_box_x2)
@@ -633,6 +644,7 @@ def convertDot2Coord(dot):
     coord = (draw_box_x1+x*space+offset+dot_r,draw_box_y1+y*space+offset+dot_r)
     return coord
 
+#-------------------------------------------------------------------------------
 def get1Point(vc,text_display,point1=None):
     region_thresh = 15
     prev_region = -1
@@ -694,6 +706,7 @@ def get1Point(vc,text_display,point1=None):
         if key == 27:
             break
 
+#-------------------------------------------------------------------------------
 def drawGrid(frame,region_bounds,dot_r):
     for i in range(len(region_bounds)):
         coord = (region_bounds[i][0],region_bounds[i][0])
@@ -701,6 +714,7 @@ def drawGrid(frame,region_bounds,dot_r):
         frame = cv2.circle(frame, coord, dot_r, (0, 0, 0), 3)
     return frame
 
+#-------------------------------------------------------------------------------
 def getDotBounds(ref_coord, max_w):
     ref_x = ref_coord[0]
     ref_y = ref_coord[1]
@@ -715,7 +729,8 @@ def getDotBounds(ref_coord, max_w):
             dot_coord_y = ref_y+offset+a*(max_w//nRows)
             region_bounds[i] = [(dot_coord_x,dot_coord_y),dot_r*2,dot_r*2]
             i += 1
-    return region_bounds   
+    return region_bounds
+
 ################################################################################
 # Main
 ################################################################################
@@ -780,8 +795,6 @@ validInput = 0
 print("Player " + str(playerTurn) + " turn:")
 
 while True:
-
-
     #rval, frame = captureImg(vc)
 
     # Drawing all the lines on the grid
@@ -805,7 +818,6 @@ while True:
     validInput = checkValidInput(x1,y1,x2,y2)
 
     if validInput == 1 :
-
         playerScored = updateScore()
 
         # Current Player 
@@ -813,16 +825,12 @@ while True:
             playerTurn = playerTurn + 1
         else :
             playerScored = 0
-              
+
         if playerTurn > num_players :
             playerTurn = 1
-            
-          
+
         print("Player " + str(playerTurn) + " turn:")
         validInput = 0
-
-
-      
 
 vc.release()
 cv2.destroyWindow('preview') 
